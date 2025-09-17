@@ -1,37 +1,56 @@
-import React, { useState } from 'react';
+// App.js
+import React, { useRef, useState } from 'react';
 import './App.css';
 
-function Square({ value, onClick }) {
-  return (
-    <button className="square" onClick={onClick}>
-      {value}
-    </button>
-  );
-}
+const App = () => {
+  const containerRef = useRef(null);
+  const [size, setSize] = useState(300); // Initial size in px
+  const [isResizing, setIsResizing] = useState(false);
 
-function Board() {
-  const [squares, setSquares] = useState(Array(9).fill(null));
+  const startResizing = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
 
-  function handleClick(i) {
-    const nextSquares = squares.slice();
-    if (nextSquares[i]) return; // Don't overwrite
-    nextSquares[i] = 'X';
-    setSquares(nextSquares);
-  }
+  const stopResizing = () => {
+    setIsResizing(false);
+  };
 
-  return (
-    <div className="board">
-      {squares.map((val, i) => (
-        <Square key={i} value={val} onClick={() => handleClick(i)} />
-      ))}
-    </div>
-  );
-}
+  const handleResizing = (e) => {
+    if (isResizing) {
+      const newSize = Math.min(window.innerWidth, window.innerHeight, e.clientX - containerRef.current.offsetLeft);
+      setSize(newSize);
+    }
+  };
 
-export default function App() {
+  React.useEffect(() => {
+    window.addEventListener('mousemove', handleResizing);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', handleResizing);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  });
+
   return (
     <div className="game-container">
-      <Board />
+      <div
+        className="resizable-board"
+        ref={containerRef}
+        style={{ width: `${size}px`, height: `${size}px` }}
+      >
+        <div className="board">
+          {Array(9).fill(null).map((_, idx) => (
+            <div className="square" key={idx}>{/* Place X or O here later */}</div>
+          ))}
+        </div>
+        <div
+          className="resize-handle"
+          onMouseDown={startResizing}
+        />
+      </div>
     </div>
   );
-}
+};
+
+export default App;
