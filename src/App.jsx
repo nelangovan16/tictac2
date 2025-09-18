@@ -7,8 +7,8 @@ const App = () => {
   const [size, setSize] = useState(300);
   const [isResizing, setIsResizing] = useState(false);
 
+  // Only track X's, no O's and no turn switching
   const [squares, setSquares] = useState(Array(9).fill(null));
-  const [xIsNext, setXIsNext] = useState(true);
 
   const startResizing = (e) => {
     e.preventDefault();
@@ -43,21 +43,14 @@ const App = () => {
   });
 
   const handleClick = (index) => {
-    if (squares[index] || calculateWinner(squares)) return;
-    const nextSquares = squares.slice();
-    nextSquares[index] = xIsNext ? 'X' : 'O';
-    setSquares(nextSquares);
-    setXIsNext(!xIsNext);
+    if (squares[index]) return; // Don't overwrite
+    const newSquares = squares.slice();
+    newSquares[index] = 'X'; // Always put X
+    setSquares(newSquares);
   };
-
-  const winner = calculateWinner(squares);
-  const status = winner
-    ? `Winner: ${winner}`
-    : `Next player: ${xIsNext ? 'X' : 'O'}`;
 
   return (
     <div className="game-container">
-      <div className="status">{status}</div>
       <div
         className="resizable-board"
         ref={containerRef}
@@ -79,24 +72,5 @@ const App = () => {
     </div>
   );
 };
-
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8], // rows
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8], // cols
-    [0, 4, 8],
-    [2, 4, 6], // diagonals
-  ];
-  for (let [a, b, c] of lines) {
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
 
 export default App;
